@@ -1,4 +1,4 @@
-name: CI - Pytest & Tests
+name: CI - Pytest
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install system dependencies (libzbar for pyzbar)
+      - name: Install system dependencies (zbar library)
         run: |
           sudo apt-get update
           sudo apt-get install -y libzbar0 libzbar-dev zbar-tools
@@ -30,17 +30,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: 'app/requirements.txt'
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r app/requirements.txt
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r app/requirements.txt
 
-      - name: Run Pytest test suite
+      - name: Run Pytest
         working-directory: ./app
         env:
-          PYTHONPATH: .
+          PYTHONPATH: ${{ github.workspace }}/app
         run: |
-          python -m pytest -v --tb=short
+          python -m pytest app/test -v --tb=short
