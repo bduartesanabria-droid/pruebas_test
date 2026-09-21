@@ -17,28 +17,30 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12"]
 
+    env:
+      PYTHONPATH: ${{ github.workspace }}/app
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install system dependencies (zbar library)
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libzbar0 libzbar-dev zbar-tools
+          sudo apt-get install -y libzbar0 libzbar-dev zbar-tools build-essential libssl-dev libffi-dev
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install -r app/requirements.txt
+          python -m pip install pytest
 
-      - name: Run Pytest
+      - name: Run Pytest suite
         working-directory: ./app
-        env:
-          PYTHONPATH: ${{ github.workspace }}/app
         run: |
-          python -m pytest app/test -v --tb=short
+          python -m pytest -v --tb=short
